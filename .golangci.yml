@@ -1,0 +1,26 @@
+linters:
+  disable-all: true
+  enable:
+    - bodyclose
+    - deadcode
+    - errcheck
+    - goconst
+    - gocyclo
+    - gofmt
+    - goimports
+# TODO: When adding a rule to force comments on exported methods, be sure to uncomment below.
+#    - golint
+    - goprintffuncname
+    - gosec
+    - gosimple
+    - govet
+    - ineffassign
+    - interfacer
+    - lll
+    - misspell
+    - nakedret
+
+issues:
+  # Disable the default exclude list so that all excludes are explicitly
+  # defined in this file.
+  exclude-use-default: false
