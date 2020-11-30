@@ -53,6 +53,7 @@ type ClientInfo struct {
 	Key       string                    `bson:"key"`
 	Status    string                    `bson:"status"`
 	Documents map[string]*ClientDocInfo `bson:"documents"`
+	Meta      map[string]string         `bson:"meta"`
 	CreatedAt time.Time                 `bson:"created_at"`
 	UpdatedAt time.Time                 `bson:"updated_at"`
 }

@@ -28,8 +28,9 @@ func Activate(
 	ctx context.Context,
 	be *backend.Backend,
 	clientKey string,
+	clientMeta map[string]string,
 ) (*types.ClientInfo, error) {
-	return be.Mongo.ActivateClient(ctx, clientKey)
+	return be.Mongo.ActivateClient(ctx, clientKey, clientMeta)
 }
 
 func Deactivate(
@@ -63,4 +64,12 @@ func FindClientAndDocument(
 	}
 
 	return clientInfo, docInfo, nil
+}
+
+func GetClients(
+	ctx context.Context,
+	be *backend.Backend,
+	clientIDs ...string,
+) ([]*types.ClientInfo, error) {
+	return be.Mongo.GetClients(ctx, clientIDs...)
 }

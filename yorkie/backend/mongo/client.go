@@ -102,7 +102,7 @@ func (c *Client) Close() error {
 	return nil
 }
 
-func (c *Client) ActivateClient(ctx context.Context, key string) (*types.ClientInfo, error) {
+func (c *Client) ActivateClient(ctx context.Context, key string, meta map[string]string) (*types.ClientInfo, error) {
 	clientInfo := types.ClientInfo{}
 	if err := c.withCollection(ColClients, func(col *mongo.Collection) error {
 		now := defaultTime.Now()
@@ -110,6 +110,7 @@ func (c *Client) ActivateClient(ctx context.Context, key string) (*types.ClientI
 			"key": key,
 		}, bson.M{
 			"$set": bson.M{
+				"meta":       meta,
 				"status":     types.ClientActivated,
 				"updated_at": now,
 			},
@@ -179,6 +180,51 @@ func (c *Client) DeactivateClient(ctx context.Context, clientID string) (*types.
 	}
 
 	return &clientInfo, nil
+}
+
+func (c *Client) GetClients(ctx context.Context, clientIDs ...string) ([]*types.ClientInfo, error) {
+	var clients []*types.ClientInfo
+
+	if err := c.withCollection(ColClients, func(col *mongo.Collection) error {
+		var ids []primitive.ObjectID
+		for _, clientID := range clientIDs {
+			id, err := primitive.ObjectIDFromHex(clientID)
+			if err != nil {
+				log.Logger.Error(err)
+				return err
+			}
+
+			ids = append(ids, id)
+		}
+
+		cursor, err := col.Find(ctx, bson.M{
+			"_id": bson.M{"$in": ids},
+		})
+		if err != nil {
+			log.Logger.Error(err)
+			return err
+		}
+
+		for cursor.Next(ctx) {
+			var client types.ClientInfo
+			if err := cursor.Decode(&client); err != nil {
+				log.Logger.Error(err)
+				return err
+			}
+
+			clients = append(clients, &client)
+		}
+		if err := cursor.Err(); err != nil {
+			log.Logger.Error(err)
+			return err
+		}
+
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+
+	return clients, nil
 }
 
 func (c *Client) FindClientInfoByID(ctx context.Context, clientID string) (*types.ClientInfo, error) {

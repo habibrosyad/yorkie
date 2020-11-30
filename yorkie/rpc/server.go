@@ -119,7 +119,7 @@ func (s *Server) ActivateClient(
 			}},
 		)
 	}
-	client, err := clients.Activate(ctx, s.backend, req.ClientKey)
+	client, err := clients.Activate(ctx, s.backend, req.ClientKey, req.ClientMeta)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -355,6 +355,28 @@ func (s *Server) WatchDocuments(
 			}
 		}
 	}
+}
+
+func (s *Server) GetClients(
+	ctx context.Context,
+	req *api.GetClientsRequest,
+) (*api.GetClientsResponse, error) {
+	clients, err := clients.GetClients(ctx, s.backend, req.ClientIds...)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	var pbClients []*api.Client
+	for _, client := range clients {
+		pbClients = append(pbClients, &api.Client{
+			ClientId:   client.ID.Hex(),
+			ClientMeta: client.Meta,
+		})
+	}
+
+	return &api.GetClientsResponse{
+		Clients: pbClients,
+	}, nil
 }
 
 func (s *Server) listenAndServeGRPC() error {
