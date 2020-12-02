@@ -296,8 +296,7 @@ func (s *RGATreeSplit) findFloorNodePreferToLeft(id *RGATreeSplitNodeID) *RGATre
 
 func (s *RGATreeSplit) splitNode(node *RGATreeSplitNode, offset int) *RGATreeSplitNode {
 	if offset > node.contentLen() {
-		log.Logger.Error(s.AnnotatedString())
-		panic("offset should be less than or equal to length")
+		offset = node.contentLen()
 	}
 
 	if offset == 0 {
